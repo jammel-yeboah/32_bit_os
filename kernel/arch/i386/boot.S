@@ -36,4 +36,19 @@ _start:
 	cli
 1:	hlt
 	jmp 1b
+
+	# Call the global constructors.
+    call _init
+
+    # Transfer control to the main kernel.
+    call kernel_main
+
+    # Enable interrupts
+    sti
+
+    # Hang if kernel_main unexpectedly returns.
+    cli
+1:  hlt
+    jmp 1b
 .size _start, . - _start
+
