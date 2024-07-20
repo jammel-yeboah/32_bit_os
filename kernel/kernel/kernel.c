@@ -4,6 +4,7 @@
 #include <kernel/idt.h>
 #include <kernel/syscall.h>
 #include <kernel/syscall_numbers.h>
+#include <kernel/timer.h>
 
 void test_fork_and_wait(void) {
     printf("Before fork. PID: %d\n", process_get_current());
@@ -31,12 +32,23 @@ void kernel_main(void) {
 
     init_syscalls();
 
+    timer_install();
+
     process_init();
-    int pid = process_create(test_fork_and_wait);
+    int pid = process_create(test_fork_and_exec);
     process_set_current(pid);
     printf("Created initial process with PID %d\n", pid);
 
-    test_fork_and_wait();
+    // Enable interrupts
+    asm volatile("sti");
+
+    // For now, we'll just call the test function directly
+    test_fork_and_exec();
 
     printf("Kernel main completed.\n");
+
+    // Halt the CPU
+    while(1) {
+        asm volatile("hlt");
+    }
 }
