@@ -2,6 +2,7 @@
 #define _KERNEL_PROCESS_H
 
 #include <stdint.h>
+#include <kernel/rbtree.h>
 
 #define MAX_PROCESSES 64
 
@@ -31,7 +32,7 @@ typedef struct {
     uint64_t start_time;       // Time when the process started/resumed running
     uint64_t vruntime;         // Virtual runtime for CFS
     int nice;                  // Nice value for CFS (-20 to +19)
-    // will add more fields as needed (e.g., memory allocation, open files, etc.)
+    rb_node_t *rb_node;        // Pointer to the process's node in the RB tree
 } process_control_block_t;
 
 void process_init(void);
@@ -42,6 +43,7 @@ void process_set_current(uint32_t pid);
 uint32_t process_get_current(void);
 void process_switch(uint32_t pid);
 void process_update_runtime(uint32_t pid);
+void process_schedule(void);
 
 extern process_control_block_t processes[MAX_PROCESSES];
 

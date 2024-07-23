@@ -17,16 +17,8 @@ void timer_handler(struct regs *r) {
     // Update runtime for the current process
     process_update_runtime(process_get_current());
 
-    // Simple round-robin scheduling
-    uint32_t current = process_get_current();
-    uint32_t next = (current + 1) % MAX_PROCESSES;
-    while (next != current) {
-        if (processes[next].state == PROCESS_STATE_READY) {
-            process_switch(next);
-            break;
-        }
-        next = (next + 1) % MAX_PROCESSES;
-    }
+    // Schedule the next process
+    process_schedule();
 }
 
 void timer_install() {

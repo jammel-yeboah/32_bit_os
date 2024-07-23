@@ -8,6 +8,7 @@
 process_control_block_t processes[MAX_PROCESSES];
 static uint32_t next_pid = 1;
 static uint32_t current_pid = 0;
+static rb_tree_t process_tree;
 
 extern void switch_to_user_mode(void);
 extern void switch_context(context_t* old, context_t* new);
@@ -18,7 +19,9 @@ void process_init(void) {
         processes[i].total_runtime = 0;
         processes[i].vruntime = 0;
         processes[i].nice = 0;
+        processes[i].rb_node = NULL;
     }
+    rb_init(&process_tree);
     printf("Process management initialized.\n");
 }
 
@@ -49,6 +52,10 @@ int process_create(void (*start_routine)(void)) {
     processes[i].kernel_stack = (uint32_t)malloc(4096) + 4096; // Allocate 4KB for kernel stack
     processes[i].context.esp = processes[i].kernel_stack;
 
+    // Insert the process into the red-black tree
+    rb_insert(&process_tree, processes[i].vruntime, &processes[i]);
+    processes[i].rb_node = rb_find(&process_tree, processes[i].vruntime);
+
     return processes[i].pid;
 }
 
@@ -59,14 +66,17 @@ void process_exit(int status) {
     // Update runtime before terminating
     process_update_runtime(current_pid);
 
+    // Remove the process from the red-black tree
+    rb_delete(&process_tree, processes[current_pid].vruntime);
+    processes[current_pid].rb_node = NULL;
+
     // Wake up parent if it's waiting
     if (processes[processes[current_pid].parent_pid].state == PROCESS_STATE_WAITING) {
         processes[processes[current_pid].parent_pid].state = PROCESS_STATE_READY;
     }
 
-    // TODO: Implement proper scheduling here
-    // For now, we'll just halt
-    while(1);
+    // Schedule next process
+    process_schedule();
 }
 
 int process_wait(uint32_t pid) {
@@ -130,6 +140,25 @@ void process_update_runtime(uint32_t pid) {
     uint64_t runtime = current_time - processes[pid].start_time;
     processes[pid].total_runtime += runtime;
     
-    // Update vruntime (simplified version, we'll refine this for CFS later)
-    processes[pid].vruntime += runtime * (1 + processes[pid].nice * 0.1);
+    // Update vruntime
+    uint64_t weight = 1024 / (1.25 * processes[pid].nice + 1);
+    processes[pid].vruntime += (runtime * 1024) / weight;
+
+    // Update the process's position in the red-black tree
+    rb_delete(&process_tree, processes[pid].rb_node->key);
+    rb_insert(&process_tree, processes[pid].vruntime, &processes[pid]);
+    processes[pid].rb_node = rb_find(&process_tree, processes[pid].vruntime);
+}
+
+void process_schedule(void) {
+    rb_node_t *next_node = rb_first(&process_tree);
+    if (!next_node) {
+        printf("No runnable processes!\n");
+        return;
+    }
+
+    process_control_block_t *next_process = (process_control_block_t *)next_node->value;
+    if (next_process->pid != current_pid) {
+        process_switch(next_process->pid);
+    }
 }
