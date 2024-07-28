@@ -4,12 +4,13 @@ This project is a basic implementation of a 32-bit operating system, focusing on
 
 ## Key Features
 
-- Process Management: Process Control Block (PCB) structure and basic lifecycle management
+- Process Management: Process Control Block (PCB) structure and advanced lifecycle management
 - Interrupt Handling: Interrupt Descriptor Table (IDT) and system call interface
 - Memory Management: Simple memory allocation for processes
 - I/O Systems: Basic terminal driver for output
 - System Calls: fork, exit, wait, exec
 - Custom Executable Format: For loading and executing user programs
+- Completely Fair Scheduler (CFS): Advanced process scheduling
 
 ## Current Implementation
 
@@ -17,6 +18,7 @@ This project is a basic implementation of a 32-bit operating system, focusing on
 - Implemented a comprehensive Process Control Block (PCB) structure
 - Created a process table to manage multiple processes
 - Developed system calls (fork, exit, wait, exec) to handle the process lifecycle
+- Implemented context switching mechanism for process execution
 
 ### Interrupt Handling
 - Set up the Interrupt Descriptor Table (IDT) to manage various interrupt types
@@ -35,29 +37,53 @@ This project is a basic implementation of a 32-bit operating system, focusing on
 - Designed a simple executable format to demonstrate program loading and execution
 - Implemented the exec system call to load and run programs
 
+### Scheduling
+- Implemented the Completely Fair Scheduler (CFS) algorithm
+- Developed a red-black tree data structure for efficient process management
+- Integrated virtual runtime calculation and process selection based on CFS principles
+
+### Testing
+- Added a test suite for process management and system calls
+- Implemented test processes to verify scheduler functionality
+
 ## Planned Additions
 
-1. Enhanced Interrupt Handling
-   - Implement handlers for hardware interrupts and exceptions
+1. Enhanced Memory Management
+   - Implement paging or segmentation for more efficient memory use
+   - Develop dynamic memory allocation for processes
 
-2. Context Switching
-   - Develop a full mechanism to switch between processes
+2. File System
+   - Design and implement a simple file system for persistent storage
 
-3. CPU Scheduling
-   - Implement basic scheduling algorithms (e.g., Round Robin)
+3. User Mode
+   - Implement proper separation between kernel and user mode
+   - Add memory protection mechanisms
 
-4. Memory Management
-   - Implement dynamic memory allocation for processes
+4. Inter-Process Communication (IPC)
+   - Develop basic IPC mechanisms like pipes or message queues
 
-5. File System
-   - Develop a simple file system for program storage and execution
-
-6. User Mode
-   - Implement separation between kernel and user mode
+5. Device Drivers
+   - Implement basic device drivers (e.g., keyboard, display)
 
 ## Building and Running
 
-(Instructions for building and running the OS will be added here once the build process is finalized)
+To build the OS:
+1. Ensure you have the necessary cross-compiler toolchain installed.
+2. Run `make` in the project root directory.
+
+To run the OS (assuming you're using QEMU):
+```
+qemu-system-i386 -kernel myos.kernel
+```
+
+## Testing
+
+The project includes a test suite to verify the functionality of various components:
+
+1. Process Management Tests: Located in `tests/process/process_test.c`
+2. System Call Tests: Located in `tests/syscall/syscall_test.c`
+
+These tests are automatically compiled and linked with the kernel. The test results will be displayed during kernel execution.
 
 ## Contributing
 
