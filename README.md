@@ -1,94 +1,85 @@
 # 32-bit Operating System
 
-This project is a basic implementation of a 32-bit operating system, focusing on core concepts and functionality. It's designed for personal educational purposes to understand the fundamentals of OS development.
+This project is an implementation of a 32-bit operating system, focusing on core concepts and functionality. It's designed for educational purposes to understand the fundamentals of OS development.
 
 ## Key Features
 
-- Process Management: Process Control Block (PCB) structure and advanced lifecycle management
-- Interrupt Handling: Interrupt Descriptor Table (IDT) and system call interface
-- Memory Management: Simple memory allocation for processes
-- I/O Systems: Basic terminal driver for output
-- System Calls: fork, exit, wait, exec
-- Custom Executable Format: For loading and executing user programs
-- Completely Fair Scheduler (CFS): Advanced process scheduling
+- Monolithic Kernel Architecture
+- Memory Management: Paging with virtual memory support
+- Process Management: Completely Fair Scheduler (CFS)
+- Interrupt Handling: IDT-based system for hardware and software interrupts
+- System Calls: Basic implementations of fork, exec, exit, and wait
+- I/O Systems: VGA text mode driver for terminal output
 
 ## Current Implementation
 
-### Process Management
-- Implemented a comprehensive Process Control Block (PCB) structure
-- Created a process table to manage multiple processes
-- Developed system calls (fork, exit, wait, exec) to handle the process lifecycle
-- Implemented context switching mechanism for process execution
-
-### Interrupt Handling
-- Set up the Interrupt Descriptor Table (IDT) to manage various interrupt types
-- Implemented an assembly-level interrupt handler with C-level dispatch
-- Created a system call handler to process user requests
+### Boot Process
+- Multiboot-compliant bootloader
+- Assembly-level initialization and protected mode switch
 
 ### Memory Management
-- Implemented basic memory allocation for processes
-- Developed a simple memory copying mechanism for the fork system call
+- Two-level paging system (4KB pages)
+- Physical memory management using bitmap allocation
+- Basic kernel heap management (bump allocator)
+- Virtual memory with 4GB address space per process
 
-### I/O
-- Implemented a basic terminal driver for text output
-- Integrated printf-style formatting for debugging and user interaction
-
-### Executable Loading
-- Designed a simple executable format to demonstrate program loading and execution
-- Implemented the exec system call to load and run programs
+### Process Management
+- Process Control Block (PCB) for process representation
+- Implementation of fork, exit, and wait system calls
+- Context switching mechanism
+- Completely Fair Scheduler (CFS) using a red-black tree
 
 ### Scheduling
 - Implemented the Completely Fair Scheduler (CFS) algorithm
 - Developed a red-black tree data structure for efficient process management
 - Integrated virtual runtime calculation and process selection based on CFS principles
 
-### Testing
-- Added a test suite for process management and system calls
-- Implemented test processes to verify scheduler functionality
+### Interrupt Handling
+- Interrupt Descriptor Table (IDT) setup
+- Handlers for system calls and hardware interrupts
+- Timer interrupt for preemptive multitasking (100Hz)
 
-## Planned Additions
+### I/O
+- Basic VGA text mode driver for terminal output
+- Simple keyboard input handling (planned)
 
-1. Enhanced Memory Management
-   - Implement paging or segmentation for more efficient memory use
-   - Develop dynamic memory allocation for processes
-
-2. File System
-   - Design and implement a simple file system for persistent storage
-
-3. User Mode
-   - Implement proper separation between kernel and user mode
-   - Add memory protection mechanisms
-
-4. Inter-Process Communication (IPC)
-   - Develop basic IPC mechanisms like pipes or message queues
-
-5. Device Drivers
-   - Implement basic device drivers (e.g., keyboard, display)
+### System Calls
+- Implementation of fundamental system calls (fork, exec, exit, wait)
+- System call interface using interrupt 0x80
 
 ## Building and Running
 
 To build the OS:
-1. Ensure you have the necessary cross-compiler toolchain installed.
+1. Ensure you have a cross-compiler toolchain for i686-elf.
 2. Run `make` in the project root directory.
 
-To run the OS (assuming you're using QEMU):
+To run the OS (using QEMU):
 ```
 qemu-system-i386 -kernel myos.kernel
 ```
 
 ## Testing
 
-The project includes a test suite to verify the functionality of various components:
+The project includes basic test suites for:
+- Process management
+- System calls
+- Memory management
 
-1. Process Management Tests: Located in `tests/process/process_test.c`
-2. System Call Tests: Located in `tests/syscall/syscall_test.c`
+Run these tests by executing the kernel and observing the output.
 
-These tests are automatically compiled and linked with the kernel. The test results will be displayed during kernel execution.
+## Future Enhancements
+
+1. File System: Implement a basic file system
+2. User-space Memory Allocation: Develop a more sophisticated allocator
+3. Inter-Process Communication (IPC): Implement basic IPC mechanisms
+4. Network Stack: Add basic networking capabilities
+5. Graphics: Implement a simple GUI
+6. Extended Device Drivers: Support for more hardware devices
 
 ## Contributing
 
-This is an educational project. Feel free to fork and experiment!
+This is an educational project. Feel free to fork, experiment, and submit pull requests!
 
 ## Learning Resources
 
-For more information on OS development, visit [OSDev.org](https://wiki.osdev.org/Main_Page).
+[OSDev.org](https://wiki.osdev.org/Main_Page) has been very helpful for this project!
