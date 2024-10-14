@@ -28,12 +28,14 @@ typedef struct {
     process_state_t state;
     context_t context;
     uint32_t kernel_stack;
-    uint64_t total_runtime;    // Total runtime in nanoseconds
-    uint64_t start_time;       // Time when the process started/resumed running
-    uint64_t vruntime;         // Virtual runtime for CFS
-    int nice;                  // Nice value for CFS (-20 to +19)
-    rb_node_t *rb_node;        // Pointer to the process's node in the RB tree
+    uint64_t total_runtime;
+    uint64_t start_time;
+    uint64_t vruntime;
+    int nice;
+    rb_node_t *rb_node;
+    page_directory_t *page_directory;
 } process_control_block_t;
+
 
 void process_init(void);
 int process_create(void (*start_routine)(void));

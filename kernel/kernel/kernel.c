@@ -4,8 +4,7 @@
 #include <kernel/idt.h>
 #include <kernel/syscall.h>
 #include <kernel/timer.h>
-#include "../tests/process/process_test.c"
-#include "../tests/syscall/syscall_test.c"
+#include <kernel/paging.h>
 
 extern void test_process_management(void);
 extern void test_syscalls(void);
@@ -20,11 +19,22 @@ void kernel_main(void) {
     init_syscalls();
     printf("System calls initialized.\n");
 
+    paging_init();
+    printf("Paging initialized.\n");
+
     timer_install();
     printf("Timer installed.\n");
 
     process_init();
     printf("Process management initialized.\n");
+
+    // Enable paging
+    uint32_t cr0;
+    asm volatile("mov %%cr0, %0": "=r"(cr0));
+    cr0 |= 0x80000000; // Enable paging!
+    asm volatile("mov %0, %%cr0":: "r"(cr0));
+
+    printf("Paging enabled.\n");
 
     test_process_management();
     test_syscalls();

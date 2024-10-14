@@ -45,11 +45,14 @@ int process_create(void (*start_routine)(void)) {
     processes[i].vruntime = 0;
     processes[i].nice = 0;
 
+    // Create a new page directory for the process
+    processes[i].page_directory = paging_clone_directory(kernel_directory);
+
     // Set up the initial context
     memset(&processes[i].context, 0, sizeof(context_t));
     processes[i].context.eip = (uint32_t)start_routine;
     processes[i].context.eflags = 0x202; // Interrupt enabled
-    processes[i].kernel_stack = (uint32_t)malloc(4096) + 4096; // Allocate 4KB for kernel stack
+    processes[i].kernel_stack = (uint32_t)kmalloc(4096) + 4096; // Allocate 4KB for kernel stack
     processes[i].context.esp = processes[i].kernel_stack;
 
     // Insert the process into the red-black tree
@@ -131,6 +134,9 @@ void process_switch(uint32_t new_pid) {
 
     processes[old_pid].state = PROCESS_STATE_READY;
     processes[new_pid].state = PROCESS_STATE_RUNNING;
+
+    // Switch to the new process's page directory
+    paging_switch_directory(processes[new_pid].page_directory);
 
     switch_context(&processes[old_pid].context, &processes[new_pid].context);
 }
